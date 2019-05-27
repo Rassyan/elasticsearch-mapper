@@ -23,7 +23,7 @@ public @interface MetaField_All {
      * The _all field can be completely disabled per-type by setting enabled to false
      * default set to true
      */
-    boolean enabled() default true;
+    boolean enabled() default false;
 
     /**
      * If store is set to true, then the original field value is retrievable and can be highlighted

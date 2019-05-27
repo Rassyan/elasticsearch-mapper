@@ -7,11 +7,10 @@ import org.elasticsearch.mapper.annotations.fieldtype.MultiNestedField;
 import org.elasticsearch.mapper.annotations.fieldtype.StringField;
 import org.elasticsearch.mapper.annotations.fieldtype.TokenCountField;
 import org.elasticsearch.mapper.annotations.meta.MetaField_All;
-import org.elasticsearch.mapper.annotations.meta.MetaField_Parent;
 
 import java.util.List;
 
-@Document(_type = "macBook", _all = @MetaField_All(enabled = false), _parent = @MetaField_Parent(parentClass = Computer.class))
+@Document(_all = @MetaField_All(enabled = false))
 public class MacBook extends Component {
 
     // default: keyword

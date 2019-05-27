@@ -19,7 +19,7 @@
     </licenses>
 
     <properties>
-        <elasticsearch.version>5.2.0</elasticsearch.version>
+        <elasticsearch.version>6.5.4</elasticsearch.version>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 	
@@ -40,7 +40,7 @@
     <dependencies>
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
-            <artifactId>transport</artifactId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
             <version>${elasticsearch.version}</version>
         </dependency>
 

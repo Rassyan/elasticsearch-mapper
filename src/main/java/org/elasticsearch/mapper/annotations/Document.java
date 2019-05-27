@@ -3,7 +3,6 @@ package org.elasticsearch.mapper.annotations;
 import org.elasticsearch.mapper.annotations.meta.MetaField_All;
 import org.elasticsearch.mapper.annotations.meta.MetaField_Routing;
 import org.elasticsearch.mapper.annotations.meta.MetaField_Source;
-import org.elasticsearch.mapper.annotations.meta.MetaField_Parent;
 
 import java.lang.annotation.*;
 
@@ -20,22 +19,12 @@ public @interface Document {
     boolean dynamic() default true;
 
     /**
-     * the type of document
-     */
-    String _type();
-
-    /**
      * The _all field is a special catch-all field which concatenates
      * the values of all of the other fields into one big string,
      * using space as a delimiter, which is then analyzed and indexed,
      * but not stored. This means that it can be searched, but not retrieved
      */
-    MetaField_All _all() default @MetaField_All(enabled = true, store = false);
-
-    /**
-     * parent type
-     */
-    MetaField_Parent _parent() default @MetaField_Parent(parentClass = {});
+    MetaField_All _all() default @MetaField_All(enabled = false, store = false);
 
     /**
      * A document is routed to a particular shard in an index using the following formula:

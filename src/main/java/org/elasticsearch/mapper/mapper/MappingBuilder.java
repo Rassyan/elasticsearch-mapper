@@ -15,12 +15,14 @@ import java.lang.reflect.Type;
 import java.util.Map;
 
 public class MappingBuilder {
+    protected final String DEFAULT_TYPE_NAME = "_doc";
 
     public Map<String, String> buildMappingAsString(Class<?> documentClazz) throws IOException {
         Map<String, XContentBuilder> mappingMap = buildMapping(documentClazz);
         Map<String, String> stringMappingMap = Maps.newLinkedHashMap();
         for (String key : mappingMap.keySet()) {
-            stringMappingMap.put(key, mappingMap.get(key).string());
+            mappingMap.get(key).flush();
+            stringMappingMap.put(key, mappingMap.get(key).getOutputStream().toString());
         }
         return stringMappingMap;
     }
@@ -49,12 +51,7 @@ public class MappingBuilder {
                     String.format("Can't find annotation[@Document] at class[%s]", documentClazz.getName()));
         }
 
-        if (document._parent().parentClass().length > 0) {
-            Class<?> parentClass = document._parent().parentClass()[0];
-            buildMapping(parentClass, mappingMap);
-        }
-
-        String indexType = document._type();
+        String indexType = DEFAULT_TYPE_NAME;
         mappingMap.put(indexType, mappingBuilder);
 
         mappingBuilder.startObject(indexType);
@@ -79,18 +76,6 @@ public class MappingBuilder {
 
         if (!document.dynamic()) {
             mapping.field("dynamic", false);
-        }
-
-        if (document._parent().parentClass().length > 0) {
-            Class<?> parentClass = document._parent().parentClass()[0];
-            Document parentTypeSetting = parentClass.getAnnotation(Document.class);
-            mapping.startObject("_parent")
-                    .field("type", parentTypeSetting._type());
-
-            if (!document._parent().eager_global_ordinals()) {
-                mapping.field("eager_global_ordinals", false);
-            }
-            mapping.endObject();
         }
     }
 
