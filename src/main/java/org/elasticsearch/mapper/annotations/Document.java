@@ -24,7 +24,7 @@ public @interface Document {
      * using space as a delimiter, which is then analyzed and indexed,
      * but not stored. This means that it can be searched, but not retrieved
      */
-    MetaField_All _all() default @MetaField_All(enabled = false, store = false);
+    MetaField_All _all() default @MetaField_All();
 
     /**
      * A document is routed to a particular shard in an index using the following formula:
@@ -33,7 +33,7 @@ public @interface Document {
      * Forgetting the routing value can lead to a document being indexed on more than one shard.
      * As a safeguard, the _routing field can be configured to make a custom routing value required for all CRUD operations
      */
-    MetaField_Routing _routing() default @MetaField_Routing(required = false);
+    MetaField_Routing _routing() default @MetaField_Routing();
 
 
     /**
@@ -41,7 +41,7 @@ public @interface Document {
      * The _source field itself is not indexed (and thus is not searchable),
      * but it is stored so that it can be returned when executing fetch requests, like get or search
      */
-    MetaField_Source _source() default @MetaField_Source(enabled = true);
+    MetaField_Source _source() default @MetaField_Source();
 
     /**
      * Each mapping type can have custom meta data associated with it.

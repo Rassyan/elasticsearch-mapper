@@ -1,0 +1,7 @@
+{
+  "index": {
+    "number_of_replicas": 1,
+    "number_of_shards": 2,
+    "refresh_interval": "20s"
+  }
+}

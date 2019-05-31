@@ -1,4 +1,4 @@
-package org.elasticsearch.mapper.mapper;
+package org.elasticsearch.mapper.mapping;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.mapper.annotations.fieldtype.BooleanField;

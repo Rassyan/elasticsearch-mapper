@@ -1,4 +1,4 @@
-package org.elasticsearch.mapper.mapper;
+package org.elasticsearch.mapper.mapping;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.mapper.annotations.enums.IndexOptions;
@@ -11,6 +11,7 @@ import org.elasticsearch.mapper.utils.StringUtils;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Set;
 
 public class StringFieldMapper {
 
@@ -29,7 +30,7 @@ public class StringFieldMapper {
         return String.class.isAssignableFrom(fieldClass);
     }
 
-    public static void mapDataType(XContentBuilder mappingBuilder, StringField stringField) throws IOException {
+    public static void mapDataType(XContentBuilder mappingBuilder, StringField stringField, Set<String> analyzers) throws IOException {
         mappingBuilder.field("type", stringField.type().code());
 
         if (stringField.boost() != 1.0f) {
@@ -89,14 +90,17 @@ public class StringFieldMapper {
 
             if (StringUtils.isNotBlank(stringField.analyzer())) {
                 mappingBuilder.field("analyzer", stringField.analyzer());
+                analyzers.add(stringField.analyzer());
             }
 
             if (StringUtils.isNotBlank(stringField.search_analyzer())) {
                 mappingBuilder.field("analyzer", stringField.search_analyzer());
+                analyzers.add(stringField.search_analyzer());
             }
 
             if (StringUtils.isNotBlank(stringField.search_quote_analyzer())) {
                 mappingBuilder.field("analyzer", stringField.search_quote_analyzer());
+                analyzers.add(stringField.search_quote_analyzer());
             }
 
             if (stringField.position_increment_gap() != 100) {
@@ -136,7 +140,7 @@ public class StringFieldMapper {
         }
     }
 
-    public static void mapDataType(XContentBuilder mappingBuilder, Field field) throws IOException {
+    public static void mapDataType(XContentBuilder mappingBuilder, Field field, Set<String> analyzers) throws IOException {
         if (!isValidStringFieldType(field)) {
             throw new IllegalArgumentException(
                     String.format("field type[%s] is invalid type of string.", field.getType()));
@@ -144,7 +148,7 @@ public class StringFieldMapper {
 
         if (field.isAnnotationPresent(StringField.class)) {
             StringField stringField = field.getDeclaredAnnotation(StringField.class);
-            mapDataType(mappingBuilder, stringField);
+            mapDataType(mappingBuilder, stringField, analyzers);
 
             return;
         }

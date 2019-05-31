@@ -1,4 +1,4 @@
-package org.elasticsearch.mapper.mapper;
+package org.elasticsearch.mapper.mapping;
 
 import com.google.common.collect.ImmutableMap;
 import org.elasticsearch.common.xcontent.XContentBuilder;

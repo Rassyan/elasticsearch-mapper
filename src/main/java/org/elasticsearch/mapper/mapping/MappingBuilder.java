@@ -1,9 +1,7 @@
-package org.elasticsearch.mapper.mapper;
+package org.elasticsearch.mapper.mapping;
 
 
-import com.google.common.collect.Maps;
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.mapper.annotations.Document;
 import org.elasticsearch.mapper.annotations.IgnoreField;
 import org.elasticsearch.mapper.utils.BeanUtils;
@@ -12,22 +10,13 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 public class MappingBuilder {
     protected final String DEFAULT_TYPE_NAME = "_doc";
 
-    public Map<String, String> buildMappingAsString(Class<?> documentClazz) throws IOException {
-        Map<String, XContentBuilder> mappingMap = buildMapping(documentClazz);
-        Map<String, String> stringMappingMap = Maps.newLinkedHashMap();
-        for (String key : mappingMap.keySet()) {
-            mappingMap.get(key).flush();
-            stringMappingMap.put(key, mappingMap.get(key).getOutputStream().toString());
-        }
-        return stringMappingMap;
-    }
-
-    public Map<String, XContentBuilder> buildMapping(Class<?> documentClazz) throws IOException {
+    public Set<String> buildMapping(Class<?> documentClazz, XContentBuilder mappingBuilder) throws IOException {
         if (documentClazz == null) {
             throw new IllegalArgumentException("param[documentClazz] can not be null!");
         }
@@ -37,13 +26,7 @@ public class MappingBuilder {
                     String.format("Can't find annotation[@Document] at class[%s]", documentClazz.getName()));
         }
 
-        Map<String, XContentBuilder> mappingMap = Maps.newLinkedHashMap();
-        buildMapping(documentClazz, mappingMap);
-        return mappingMap;
-    }
-
-    private void buildMapping(Class<?> documentClazz, Map<String, XContentBuilder> mappingMap) throws IOException {
-        XContentBuilder mappingBuilder = XContentFactory.jsonBuilder().prettyPrint().startObject();
+//        mappingBuilder.startObject();
         Document document = documentClazz.getAnnotation(Document.class);
 
         if (document == null) {
@@ -51,16 +34,15 @@ public class MappingBuilder {
                     String.format("Can't find annotation[@Document] at class[%s]", documentClazz.getName()));
         }
 
-        String indexType = DEFAULT_TYPE_NAME;
-        mappingMap.put(indexType, mappingBuilder);
-
-        mappingBuilder.startObject(indexType);
+        mappingBuilder.startObject(DEFAULT_TYPE_NAME);
 
         buildTypeSetting(mappingBuilder, documentClazz);
-        buildTypeProperty(mappingBuilder, documentClazz);
+        Set<String> analyzers = new HashSet<>();
+        buildTypeProperty(mappingBuilder, documentClazz, analyzers);
 
         mappingBuilder.endObject();
-        mappingBuilder.endObject();
+//        mappingBuilder.endObject();
+        return analyzers;
     }
 
     private void buildTypeSetting(XContentBuilder mapping, Class clazz) throws IOException {
@@ -79,7 +61,7 @@ public class MappingBuilder {
         }
     }
 
-    private XContentBuilder buildTypeProperty(XContentBuilder mappingBuilder, Class clazz) throws IOException {
+    private XContentBuilder buildTypeProperty(XContentBuilder mappingBuilder, Class clazz, Set<String> analyzers) throws IOException {
         mappingBuilder.startObject("properties");
 
         Field[] classFields = BeanUtils.retrieveFields(clazz);
@@ -96,7 +78,7 @@ public class MappingBuilder {
                 continue;
             }
 
-            buildFieldProperty(mappingBuilder, classField);
+            buildFieldProperty(mappingBuilder, classField, analyzers);
         }
 
         mappingBuilder.endObject();
@@ -104,7 +86,7 @@ public class MappingBuilder {
         return mappingBuilder;
     }
 
-    private XContentBuilder buildFieldProperty(XContentBuilder mappingBuilder, Field field) throws IOException {
+    private XContentBuilder buildFieldProperty(XContentBuilder mappingBuilder, Field field, Set<String> analyzers) throws IOException {
         mappingBuilder.startObject(field.getName());
 
         // Geo point  field
@@ -137,7 +119,7 @@ public class MappingBuilder {
         }
         // Multi field
         else if (MultiFieldMapper.isValidMultiFieldType(field)) {
-            MultiFieldMapper.mapDataType(mappingBuilder, field);
+            MultiFieldMapper.mapDataType(mappingBuilder, field, analyzers);
         }
         // Completion Field
         else if (CompletionFieldMapper.isValidCompletionFieldType(field)) {
@@ -145,7 +127,7 @@ public class MappingBuilder {
         }
         // String field
         else if (StringFieldMapper.isValidStringFieldType(field)) {
-            StringFieldMapper.mapDataType(mappingBuilder, field);
+            StringFieldMapper.mapDataType(mappingBuilder, field, analyzers);
         }
         // Date field
         else if (DateFieldMapper.isValidDateType(field)) {
@@ -161,12 +143,12 @@ public class MappingBuilder {
 
             //Nested Doc Type
             mappingBuilder.field("type", "nested");
-            buildTypeProperty(mappingBuilder, (Class) genericType);
+            buildTypeProperty(mappingBuilder, (Class) genericType, analyzers);
         }
         //Inner Doc Type
         else {
             mappingBuilder.field("type", "object");
-            buildTypeProperty(mappingBuilder, field.getType());
+            buildTypeProperty(mappingBuilder, field.getType(), analyzers);
         }
         mappingBuilder.endObject();
 

@@ -1,4 +1,4 @@
-package org.elasticsearch.mapper.mapper;
+package org.elasticsearch.mapper.mapping;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.mapper.annotations.fieldtype.GeoPointField;
@@ -8,10 +8,6 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 
 public class GeoPointFieldMapper {
-
-    public static void main(String[] args) {
-        Class cls = String.class;
-    }
 
     public static boolean isValidGeoPointFieldType(Field field) {
         Class<?> fieldClass = field.getType();
