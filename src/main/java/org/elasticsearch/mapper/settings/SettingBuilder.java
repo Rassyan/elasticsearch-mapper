@@ -29,7 +29,7 @@ public class SettingBuilder {
     public SettingBuilder(String configPath) throws IOException {
         this.analysisBuilder = new AnalysisBuilder(configPath);
         this.mappingBuilder = new MappingBuilder();
-        this.configPath = CoreConstant.CONFIG_PATH;
+        this.configPath = configPath;
     }
 
     public XContentBuilder buildSetting(Class<?> documentClazz) throws IOException {
